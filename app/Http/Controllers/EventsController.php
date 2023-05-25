@@ -11,7 +11,8 @@ use Illuminate\Support\Facades\Date;
 
 class EventsController extends BaseController
 {
-    public function getWarmupEvents() {
+    public function getWarmupEvents()
+    {
         return Event::all();
     }
 
@@ -100,8 +101,10 @@ class EventsController extends BaseController
     ]
      */
 
-    public function getEventsWithWorkshops() {
-        throw new \Exception('implement in coding task 1');
+    public function getEventsWithWorkshops()
+    {
+        $events = Event::with('workshops')->get();
+        return $events;
     }
 
 
@@ -178,7 +181,18 @@ class EventsController extends BaseController
     ```
      */
 
-    public function getFutureEventsWithWorkshops() {
-        throw new \Exception('implement in coding task 2');
+    public function getFutureEventsWithWorkshops()
+    {
+        $future_events = Event::with([
+            'workshops' => function ($query) {
+                $query->where('start', '>', now())->orderBy('start')
+                    ->take(1);
+            }])
+            ->whereHas('workshops', function ($query) {
+                $query->where('start', '>', now());
+            })
+            ->get();
+
+        return $future_events;
     }
 }

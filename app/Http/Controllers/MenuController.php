@@ -92,7 +92,37 @@ class MenuController extends BaseController
     ]
      */
 
-    public function getMenuItems() {
-        throw new \Exception('implement in coding task 3');
+    public function getMenuItems()
+    {
+        $menu_items = MenuItem::whereNull('parent_id')
+            ->with('children')
+            ->orderBy('id')
+            ->get();
+
+        $result = [];
+        foreach ($menu_items as $menu_item) {
+            $result[] = $this->buildMenu($menu_item);
+        }
+
+        return $result;
+    }
+
+    private function buildMenu($menu_item)
+    {
+        $menu = [
+            'id' => $menu_item->id,
+            'name' => $menu_item->name,
+            'url' => $menu_item->url,
+            'parent_id' => $menu_item->parent_id,
+            'created_at' => $menu_item->created_at,
+            'updated_at' => $menu_item->updated_at,
+            'children' => [],
+        ];
+
+        foreach ($menu_item->children as $child) {
+            $menu['children'][] = $this->buildMenu($child);
+        }
+
+        return $menu;
     }
 }
